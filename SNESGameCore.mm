@@ -41,10 +41,13 @@
 #include "snapshot.h"
 #include "screenshot.h"
 #include "cheats.h"
+#include "netplay.h"
 #import "OESNESSystemResponderClient.h"
 
 #define SAMPLERATE      32000
 #define SIZESOUNDBUFFER SAMPLERATE / 50 * 4
+
+#define kSNESRemotePlayPort 6096
 
 @interface SNESGameCore () <OESNESSystemResponderClient>
 {
@@ -213,9 +216,13 @@ static void FinalizeSamplesAudioCallback(void *)
     memset(soundBuffer, 0, SIZESOUNDBUFFER * sizeof(UInt16));
 }
 
+
 - (void)resetEmulation
 {
     S9xSoftReset();
+	
+	//[self startServer];
+	[self connectToServerAtAddress:@"10.0.0.53"];
 }
 
 - (void)stopEmulation
@@ -336,6 +343,21 @@ NSMutableDictionary *cheatList = [[NSMutableDictionary alloc] init];
     
     Settings.ApplyCheats = true;
     S9xApplyCheats();
+}
+
+#pragma mark - Netplay
+
+- (void)connectToServerAtAddress:(NSString *)address {
+	if(!S9xNPConnectToServer([address cStringUsingEncoding:NSUTF8StringEncoding], kSNESRemotePlayPort, Memory.ROMFilename)) {
+		NSLog(@"Connection failed!");
+		return;
+	}
+
+	S9xNPSendReady(YES);
+}
+
+- (void)startServer {
+	S9xNPStartServer(kSNESRemotePlayPort);
 }
 
 @end

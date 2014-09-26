@@ -32,4 +32,6 @@
 
 OE_EXPORTED_CLASS
 @interface SNESGameCore : OEGameCore
+
+@property (readwrite, getter=isRemotePlaying) BOOL remotePlaying;
 @end

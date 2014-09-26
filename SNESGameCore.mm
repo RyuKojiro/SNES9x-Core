@@ -98,6 +98,11 @@ NSString *SNESEmulatorKeys[] = { @"Up", @"Down", @"Left", @"Right", @"A", @"B", 
 - (void)executeFrameSkippingFrame:(BOOL)skip
 {
     IPPU.RenderThisFrame = !skip;
+	
+	if ([self isRemotePlaying]) {
+		S9xNPWaitForHeartBeat();
+	}
+	
     S9xMainLoop();
 }
 
@@ -221,7 +226,7 @@ static void FinalizeSamplesAudioCallback(void *)
 {
     S9xSoftReset();
 	
-	//[self startServer];
+//	[self startServer];
 	[self connectToServerAtAddress:@"10.0.0.53"];
 }
 
@@ -352,12 +357,13 @@ NSMutableDictionary *cheatList = [[NSMutableDictionary alloc] init];
 		NSLog(@"Connection failed!");
 		return;
 	}
-
-	S9xNPSendReady(YES);
+	
+	[self setRemotePlaying:YES];
 }
 
 - (void)startServer {
 	S9xNPStartServer(kSNESRemotePlayPort);
+	[self setRemotePlaying:YES];
 }
 
 @end
